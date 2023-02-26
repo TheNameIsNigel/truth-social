@@ -51,6 +51,7 @@
 #  verified                      :boolean          default(FALSE), not null
 #  location                      :text             default(""), not null
 #  website                       :text             default(""), not null
+#  whale                         :boolean          default(FALSE)
 #
 
 class Account < ApplicationRecord
@@ -99,7 +100,7 @@ class Account < ApplicationRecord
   validates :display_name, length: { maximum: 30 }, if: -> { local? && will_save_change_to_display_name? }
   validates :note, note_length: { maximum: 500 }, if: -> { local? && will_save_change_to_note? }
   validates :fields, length: { maximum: 4 }, if: -> { local? && will_save_change_to_fields? }
-  
+
   validate :check_website_field_for_javascript
 
   scope :remote, -> { where.not(domain: nil) }
@@ -150,7 +151,12 @@ class Account < ApplicationRecord
 
   delegate :chosen_languages, to: :user, prefix: false, allow_nil: true
 
-  update_index('accounts#account', :self)
+  update_index 'accounts#account', :self
+
+  def contains_prohibited_terms?
+    user_and_display_name_downcase = "#{username} #{display_name}".downcase
+    Status::PROHIBITED_TERMS_ON_INDEX.any? { |term| user_and_display_name_downcase.include? term }
+  end
 
   def local?
     domain.nil?
@@ -244,8 +250,8 @@ class Account < ApplicationRecord
     transaction do
       create_deletion_request!
       update!(suspended_at: date, suspension_origin: origin)
-      create_canonical_email_block!
     end
+    create_canonical_email_block!
   end
 
   def unsuspend!
@@ -388,6 +394,10 @@ class Account < ApplicationRecord
     errors.add(:base, "Please enter a valid website") if JAVASCRIPT_RE.match(website)
   end
 
+  # TODO: follow_requests profile feature toggle "locked"
+  # this should override the db value of "locked" for an
+  # account. Remove this method if the locked feature is
+  # re-enabled in the future.
   def locked
     false
   end
@@ -409,6 +419,17 @@ class Account < ApplicationRecord
 
     @synchronization_uri_prefix ||= uri[/http(s?):\/\/[^\/]+\//]
   end
+
+  def promote_to_whale!
+    update!(whale: true)
+    WhaleCacheInvalidationWorker.perform_async(id)
+  end
+
+  def demote_from_whale!
+    update!(whale: false)
+    WhaleCacheInvalidationWorker.perform_async(id)
+  end
+
 
   class Field < ActiveModelSerializers::Model
     attributes :name, :value, :verified_at, :account
@@ -612,6 +633,8 @@ class Account < ApplicationRecord
     return unless local? && user_email.present?
 
     CanonicalEmailBlock.create(reference_account: self, email: user_email)
+  rescue ActiveRecord::RecordNotUnique
+    nil
   end
 
   def destroy_canonical_email_block!

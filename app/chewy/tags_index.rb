@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class TagsIndex < Chewy::Index
-  settings index: { refresh_interval: '15m' }, analysis: {
+  settings index: { refresh_interval: '15m' }, number_of_shards: '12', analysis: {
     analyzer: {
       content: {
         tokenizer: 'keyword',
@@ -23,7 +23,9 @@ class TagsIndex < Chewy::Index
     },
   }
 
-  define_type ::Tag.listable, delete_if: ->(tag) { tag.destroyed? || !tag.listable? } do
+  define_type ::Tag.listable, delete_if: ->(tag) {
+    tag.destroyed? || !tag.listable?
+  } do
     root date_detection: false do
       field :name, type: 'text', analyzer: 'content' do
         field :edge_ngram, type: 'text', analyzer: 'edge_ngram', search_analyzer: 'content'

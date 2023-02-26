@@ -5,7 +5,8 @@ class REST::InstanceSerializer < ActiveModel::Serializer
 
   attributes :uri, :title, :short_description, :description, :email,
              :version, :urls, :thumbnail, :languages, :registrations,
-             :approval_required, :invites_enabled, :configuration
+             :approval_required, :invites_enabled, :configuration,
+             :feature_quote
 
   has_many :rules, serializer: REST::RuleSerializer
 
@@ -32,7 +33,7 @@ class REST::InstanceSerializer < ActiveModel::Serializer
   end
 
   def version
-    Mastodon::Version.to_s
+    "#{Mastodon::Version} (compatible; TruthSocial 1.0.0)"
   end
 
   def thumbnail
@@ -83,6 +84,10 @@ class REST::InstanceSerializer < ActiveModel::Serializer
 
   def invites_enabled
     Setting.min_invite_role == 'user'
+  end
+
+  def feature_quote
+    false
   end
 
   private

@@ -31,7 +31,7 @@ RSpec.describe 'Rack::Attack', type: :request do
       end
 
       it 'it returns http unauthorized' do
-        expect(response).to have_http_status(401)
+        expect(response).to have_http_status(403)
       end
     end
 
@@ -55,7 +55,7 @@ RSpec.describe 'Rack::Attack', type: :request do
       end
 
       it 'it doesnt limit' do
-        expect(response).to have_http_status(401)
+        expect(response).to have_http_status(403)
       end
     end
 
@@ -70,7 +70,7 @@ RSpec.describe 'Rack::Attack', type: :request do
 
         travel_to(10.minutes.from_now) do
           get api_v1_timelines_home_path, headers: headers
-          expect(response).to have_http_status(401)
+          expect(response).to have_http_status(403)
         end
       end
     end
@@ -149,6 +149,12 @@ RSpec.describe 'Rack::Attack', type: :request do
         post api_pleroma_change_password_path, headers: headers, params: params
         expect(response).to have_http_status(400)
       end
+
+      it 'it returns http no content for /api/v1/truth/password_reset/request' do
+        post api_v1_truth_request_path, headers: headers, params: params
+        expect(response).to have_http_status(204)
+      end
+
     end
 
     context 'when more change_password attempts than the limit are made' do
@@ -158,6 +164,11 @@ RSpec.describe 'Rack::Attack', type: :request do
 
       it 'it returns http too many requests for /auth/password' do
         post '/auth/password', headers: headers
+        expect(response).to have_http_status(429)
+      end
+
+      it 'it returns http too many requests for /api/v1/truth/password_reset/request' do
+        post api_v1_truth_request_path, headers: headers, params: params
         expect(response).to have_http_status(429)
       end
 
@@ -174,7 +185,7 @@ RSpec.describe 'Rack::Attack', type: :request do
 
       it 'it returns http bad request for /api/v1/emails/confirmation' do
         post api_v1_emails_confirmations_path, headers: headers
-        expect(response).to have_http_status(401)
+        expect(response).to have_http_status(403)
       end
 
       it 'it returns http bad request for /api/v1/truth/email/confirm' do
@@ -250,6 +261,12 @@ RSpec.describe 'Rack::Attack', type: :request do
         post api_pleroma_change_password_path, headers: headers, params: params_api_pleroma
         expect(response).to have_http_status(429)
       end
+
+      it 'it returns http too many requests for /api/v1/truth/password_reset/request' do
+        post api_v1_truth_request_path, headers: headers, params: params_api_pleroma
+        expect(response).to have_http_status(429)
+      end
+
     end
 
     context 'when more email_confirmations attempts than the limit are made' do

@@ -6,12 +6,13 @@ class Api::V1::Timelines::HomeController < Api::BaseController
   after_action :insert_pagination_headers, unless: -> { @statuses.empty? }
 
   def show
-    Rails.logger.debug "X-Forwarded-For: #{request.headers["X-Forwarded-For"]} Detected ip: #{request.remote_ip}"
-    @statuses = load_statuses
+    @statuses  = load_statuses
+    account_ids = @statuses.filter(&:quote?).map { |status| status.quote.account_id }.uniq
 
     render json: @statuses,
            each_serializer: REST::StatusSerializer,
            relationships: StatusRelationshipsPresenter.new(@statuses, current_user&.account_id),
+           account_relationships: AccountRelationshipsPresenter.new(account_ids, current_user&.account_id),
            status: account_home_feed.regenerating? ? 206 : 200
   end
 

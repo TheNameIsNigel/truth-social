@@ -15,7 +15,10 @@ module Prometheus
       login_attempts: 'number of login attempts',
       registrations: 'number of registrations',
       media_uploads: 'number of uploaded media files',
-      links: 'number of posted links'
+      follows: 'number of accounts following account',
+      unfollows: 'number of accounts unfollowing accounts',
+      links: 'number of posted links',
+      approves: 'number of approved users'
     }
 
     prometheus_client = PrometheusExporter::Client.default
@@ -25,7 +28,9 @@ module Prometheus
     end
 
     def increment(metric, labels = {})
-      @counter_instances[metric]&.increment(labels)
+      return if Rails.env.test? || Rails.env.development?
+
+      @counter_instances[metric]&.increment(labels) 
     end
   end
 end

@@ -1084,10 +1084,14 @@ en:
       body: 'Your post was liked by %{name}:'
       subject: "%{name} liked your post"
       title: New favorite
+    favourite_group:
+      subject: "%{name} + %{count_others} %{actor} liked your Truth"
     follow:
       body: "%{name} is now following you!"
       subject: "%{name} is now following you"
       title: New follower
+    follow_group:
+      subject: "%{name} + %{count_others} %{actor} followed you"
     follow_request:
       action: Manage follow requests
       body: "%{name} has requested to follow you"
@@ -1098,12 +1102,16 @@ en:
       body: 'You were mentioned by %{name} in:'
       subject: You were mentioned by %{name}
       title: New mention
+    mention_group:
+      subject: "%{name} + %{count_others} %{actor} mentioned you"
     poll:
       subject: A poll by %{name} has ended
     reblog:
       body: 'Your post was ReTruthed by %{name}:'
       subject: "%{name} ReTruthed your post"
       title: New ReTruth
+    reblog_group:
+      subject: "%{name} + %{count_others} %{actor} ReTruthed your Truth"
     status:
       subject: "%{name} just posted"
     user_approved:
@@ -1126,6 +1134,8 @@ en:
       tip_mobile_webapp: If your mobile browser offers you to add Truth to your homescreen, you can receive push notifications. It acts like a native app in many ways!
       tips: Tips
       title: Welcome to Truth Social, %{name}!
+    verify_sms_prompt:
+      subject: Your account is now active on Truth Social! Upgrade to the latest version and join us now!
   notifications:
     email_events: Events for e-mail notifications
     email_events_hint: 'Select events that you want to receive notifications for:'
@@ -1448,9 +1458,9 @@ en:
       subject: Please confirm attempted sign in
       title: Sign in attempt
     status_removed:
-      explanation: You have a status that has been removed for violating Truth social community guidelines.
-      title: Your status has been removed
-      subject: Your status has been removed
+      explanation: You have a Truth that has been removed for violating Truth Social community guidelines.
+      title: Your Truth has been removed
+      subject: Your Truth has been removed
     warning:
       explanation:
         ban_html: After careful review we have decided to delete your account permanently due to Truth social community guidelines violations. If you feel we have made an error, you can file an appeal with %{email}.
@@ -1458,6 +1468,7 @@ en:
         sensitive_html: Your uploaded media files and linked media will be treated as sensitive.
         silence_html: You can still use your account but only people who are already following you will see your posts on this server, and you may be excluded from various public listings. However, others may still manually follow you.
         suspend_html: Your account is suspended and will be inaccessible for %{suspension_duration}.
+        suspend_indefinite_html: Your account is suspended and will be inaccessible.
         verify_html: You're a certified member of the commumity
         unverify_html: You're no longer a certified member of the community
       get_in_touch: You can reply to this e-mail to get in touch with Truth Social.
